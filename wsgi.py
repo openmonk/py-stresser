@@ -6,5 +6,9 @@ application = Flask(__name__)
 def index():
     return "apps index here"
 
+@application.route("/hc")
+def healthcheck():
+    return "ok"
+
 if __name__ == "__main__":
     application.run()
