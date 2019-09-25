@@ -4,6 +4,7 @@ import time
 import os
 import socket
 import threading
+import paramiko
 
 app = Flask(__name__)
 app.config['STRESS_DELAY'] = 5
@@ -44,6 +45,21 @@ def thread_eater(nr = 0):
         return Response(omnomnom(), mimetype="text/plain")
     else:
         return "thread eater\n"
+
+@app.route("/ssh/<hostname>/<int:port>/<username>/<password>")
+def ssh_to(hostname = "", port = 22, username = "", password = ""):
+    def do_it():
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        yield "creating connection\n"
+        ssh.connect(hostname, username=username, password=password)
+        yield "connected: %s\n" % ( pformat(ssh), )
+        ssh.close()
+        yield "disconnected: %s\n" % ( pformat(ssh), )
+    if int(port):
+        return Response(do_it(), mimetype="text/plain")
+    else:
+        return "ssh tester\n"
 
 @app.route("/socket.eater/<int:nr>")
 def socket_eater(nr = 0):
