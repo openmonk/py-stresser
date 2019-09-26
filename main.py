@@ -5,9 +5,11 @@ import os
 import socket
 import threading
 import paramiko
+import httplib2
 
 app = Flask(__name__)
 app.config['STRESS_DELAY'] = 5
+app.url_map.strict_slashes = False
 
 @app.route("/")
 def index():
@@ -24,6 +26,10 @@ def health_check():
 def set_stress_delay(seconds = 10):
     app.config['STRESS_DELAY'] = seconds
     return "%s: STRESS_DELAY=%d\n" % ( time.ctime(), app.config['STRESS_DELAY'] )
+
+@app.route("/fetch/<path:url>")
+def url_fetch(url = "http://127.0.0.1:8080/"):
+    return pformat(httplib2.Http().request(url))
 
 @app.route("/tread.eater/<int:nr>")
 def thread_eater(nr = 0):
@@ -52,7 +58,7 @@ def ssh_to(hostname = "", port = 22, username = "", password = ""):
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         yield "creating connection\n"
-        ssh.connect(hostname, username=username, password=password)
+        ssh.connect(hostname, port=port, username=username, password=password)
         yield "connected: %s\n" % ( pformat(ssh), )
         ssh.close()
         yield "disconnected: %s\n" % ( pformat(ssh), )
