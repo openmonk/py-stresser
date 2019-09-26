@@ -29,7 +29,8 @@ def set_stress_delay(seconds = 10):
 
 @app.route("/fetch/<path:url>")
 def url_fetch(url = "http://127.0.0.1:8080/"):
-    return pformat(httplib2.Http().request(url))
+    http = httplib2.Http(proxy_info = None)
+    return pformat(http.request(url))
 
 @app.route("/tread.eater/<int:nr>")
 def thread_eater(nr = 0):
